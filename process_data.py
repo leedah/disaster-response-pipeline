@@ -15,7 +15,7 @@ Arguments:
 Usage:
     python process_data.py <messages_filepath> <categories_filepath> <database_filename>
 
-Sample Execution:
+Execution Example:
     python process_data.py disaster_messages.csv disaster_categories.csv disaster_response_db.db
 
 """
@@ -75,6 +75,22 @@ def clean_data(df):
         
         # convert column from string to numeric
         categories[column] = pd.to_numeric(categories[column])
+
+
+    # check if there are columns that have values other than '0' and '1'
+
+    for column in categories.columns:
+        test = categories[column].isin([0,1]).all()
+        if(not test): print(column)
+
+    # we notice that the 'related' category there are a few '2's
+    categories['related'].value_counts()
+
+    # This should be an error. We will assume '2's to be '1's
+
+    categories['related'] = categories['related'].map(\
+        lambda x: 1 if x == 2 else x)
+    categories['related'].value_counts()
     
     # drop the original categories column from `df`
     df.drop(columns=['categories'], inplace=True)
