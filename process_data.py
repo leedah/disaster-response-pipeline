@@ -3,7 +3,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 """
-Data Preprocessing using an ETL Piepleine.
+Data Preprocessing using an ETL Pipeline.
 
 Loads, cleans and saves data into an sqlite database.
 
@@ -91,6 +91,13 @@ def clean_data(df):
     categories['related'] = categories['related'].map(\
         lambda x: 1 if x == 2 else x)
     categories['related'].value_counts()
+
+    # Check if there are categories with all values zero and drop them
+    zero_columns = categories.columns[(categories == 0).all()]
+    # print(zero_columns)
+    categories = categories.drop(zero_columns, axis=1)
+
+
     
     # drop the original categories column from `df`
     df.drop(columns=['categories'], inplace=True)
