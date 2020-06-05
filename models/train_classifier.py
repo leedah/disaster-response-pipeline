@@ -50,7 +50,7 @@ nltk.download(['punkt', 'wordnet', 'averaged_perceptron_tagger'])
 
 
 def load_data(database_filepath):
-    """ Function to load dataset from an sqlite database.
+    """ Loads dataset from an sqlite database.
 
     Arguments: 
         database_filepath: name of database
@@ -124,6 +124,8 @@ def build_model():
         model: Scikit Pipeline or GridSearchCV object
     """ 
 
+    # LinearSVC Classifier was selected as it performed better than DecisionTree,
+    # RandomForest and AdaBoost, all tried in the ML Pipeline Preparation notebook.
 
     pipeline = Pipeline([
 
@@ -141,7 +143,7 @@ def build_model():
 
     parameters = {
         'clf__estimator__loss': ('hinge', 'squared_hinge'),
-        'clf__estimator__C': (0.01, 0.5, 1.0)
+        'clf__estimator__C': (0.5, 1.0)
     } 
 
     cv = GridSearchCV(estimator=pipeline, n_jobs = -1, param_grid=parameters)
@@ -184,11 +186,6 @@ def evaluate_model(model, X_test, Y_test, category_names):
     Y_pred.index = Y_test.index;
 
     print(classification_report(Y_test, Y_pred, target_names=category_names))
-
-    # for column in Y_test.columns:
-    #     print('Column : ' , column)
-    #     print(classification_report(Y_test[column], Y_pred[column]))
-
 
     # if we use grid search
     print("\nBest Parameters:", model.best_params_)
