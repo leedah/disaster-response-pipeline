@@ -44,56 +44,58 @@ def index():
     # extract data needed for visuals
 
     genre_counts = df.groupby('genre').count()['message']
+    gen_percentage = round(100*genre_counts/genre_counts.sum(), 2)
     genre_names = list(genre_counts.index)
     
-    category_names = df.iloc[:,4:].columns
-    category_counts = (df.iloc[:,4:] != 0).sum().values
+#     category_names = df.iloc[:,4:].columns
+#     category_counts = (df.iloc[:,4:] != 0).sum().values
+
+    category_counts = df.drop(['id', 'message', 'original', 'genre'], axis = 1).sum()
+    category_counts = category_counts.sort_values(ascending = False)
+    category_names = list(category_counts.index)
+
     
     # create visuals
-
     graphs = [
-        
-        # Graph 1: Genres count
         {
-            'data': [
-                Bar(
-                    x=genre_names,
-                    y=genre_counts
-                )
-            ],
-
-            'layout': {
-                'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
+            "data": [
+              {
+                "type": "pie",
+                "name": "Genre",
+                "domain": {
+                  "x": gen_percentage,
+                  "y": genre_names
                 },
-                'xaxis': {
-                    'title': "Genre"
-                }
+                "hoverinfo": "all",
+                "labels": genre_names,
+                "values": genre_counts
+              }
+            ],
+            "layout": {
+              "title": "Messages by Genre"
             }
         },
-        
-        # Graph 2: Categories count
         {
-            'data': [
-                Bar(
-                    x=category_names,
-                    y=category_counts
-                )
-            ],
-
-            'layout': {
-                'title': 'Distribution of Message Categories',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Category",
-                    'tickangle': 90
+            "data": [
+              {
+                "type": "bar",
+                "x": category_names,
+                "y": category_counts,
+                "marker": {
+                  "color": 'pink'}
                 }
+            ],
+            "layout": {
+              "title": "Messages by Category",
+              'yaxis': {
+                  'title': "Count"
+              },
+              'xaxis': {
+                  'title': "Category"
+              },
+              'barmode': 'group'
             }
         }
-        
     ]
     
     # encode plotly graphs in JSON
