@@ -66,6 +66,13 @@ def index():
                   "x": gen_percentage,
                   "y": genre_names
                 },
+                "marker": {
+                  "colors": [
+                    "#636EFA",
+                    "#EF553B",
+                    "#00CC96"
+                   ]
+                },  
                 "hoverinfo": "all",
                 "labels": genre_names,
                 "values": genre_counts
@@ -82,7 +89,7 @@ def index():
                 "x": category_names,
                 "y": category_counts,
                 "marker": {
-                  "color": 'pink'}
+                  "color": '#AB63FA'}
                 }
             ],
             "layout": {
@@ -91,7 +98,8 @@ def index():
                   'title': "Count"
               },
               'xaxis': {
-                  'title': "Category"
+                  'title': "Category",
+                  'tickangle': 40
               },
               'barmode': 'group'
             }
