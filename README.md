@@ -44,6 +44,16 @@ Arguments:
 
 ### Flask Web App
 
+Search Bar:
+![Search Bar](img/search_bar.png=)
+
+Overview of training dataset:
+![Genre Visualization](img/genre.png)
+![Category Visualization](img/category.png=)
+
+Example of a message classification:
+![Example](img/army.png)
+
 ## Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
 
