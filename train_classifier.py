@@ -62,6 +62,7 @@ def load_data(database_filepath):
     """  
     
     engine = create_engine('sqlite:///'+ database_filepath)
+    
     path, file = os.path.split(database_filepath)
     # print(path, file)
     table_name = file.replace(".db","") + "Table"
@@ -124,56 +125,30 @@ def build_model():
     """ 
 
 
-    # Create custom transformer
-
-    class StartingVerbExtractor(BaseEstimator, TransformerMixin):
-
-        def starting_verb(self, text):
-            sentence_list = nltk.sent_tokenize(text)
-            for sentence in sentence_list:
-                pos_tags = nltk.pos_tag(tokenize(sentence))
-                first_word, first_tag = pos_tags[0]
-                if first_tag in ['VB', 'VBP'] or first_word == 'RT':
-                    return True
-            return False
-
-        def fit(self, x, y=None):
-            return self
-
-        def transform(self, X):
-            X_tagged = pd.Series(X).apply(self.starting_verb)
-            return pd.DataFrame(X_tagged)
-
     pipeline = Pipeline([
-        ('features', FeatureUnion([
 
-            ('text_pipeline', Pipeline([
-                ('vect', CountVectorizer(tokenizer=tokenize)),
-                ('tfidf', TfidfTransformer())
-            ])),
-
-            ('starting_verb', StartingVerbExtractor())
-        ])),
-
+        ('vect', CountVectorizer(tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
         ('clf', MultiOutputClassifier(LinearSVC()))
     ])
 
     model = pipeline
 
-    # Use grid search to find better parameters #
+    ############ Use grid search to find better parameters ####################
 
-    check pipeline parameters
-    pipeline.get_params()
+    # check pipeline parameters
+    # pipeline.get_params()
 
     parameters = {
         'clf__estimator__loss': ('hinge', 'squared_hinge'),
         'clf__estimator__C': (0.01, 0.5, 1.0)
     } 
 
-
     cv = GridSearchCV(estimator=pipeline, n_jobs = -1, param_grid=parameters)
     
     model = cv
+
+    ###########################################################################
 
     return model
 
@@ -199,7 +174,21 @@ def evaluate_model(model, X_test, Y_test, category_names):
     accuracy = (Y_pred == Y_test).mean().mean()
     print('Accuracy {0:.2f}% \n'.format(accuracy*100))
 
-    # print(classification_report(Y_test.values, Y_pred, category_names))
+
+    # If some labels are not predicted at least once, Y_pred will have different 
+    # columns than Y_test, which will cause an error in the classification_report()
+    # So make sure Y_pred has the same labels as Y_test.
+
+    Y_pred = pd.DataFrame(Y_pred);
+    Y_pred.columns = Y_test.columns;
+    Y_pred.index = Y_test.index;
+
+    print(classification_report(Y_test, Y_pred, target_names=category_names))
+
+    # for column in Y_test.columns:
+    #     print('Column : ' , column)
+    #     print(classification_report(Y_test[column], Y_pred[column]))
+
 
     # if we use grid search
     print("\nBest Parameters:", model.best_params_)
@@ -228,7 +217,7 @@ def main():
         X, Y, category_names = load_data(database_filepath)
 
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=42, test_size=0.2)
-        
+            
         print('Building model...')
         model = build_model()
         
