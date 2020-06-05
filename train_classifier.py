@@ -119,16 +119,62 @@ def build_model():
         None
     
     Returns: 
-        pipeline: Scikit Pipeline or GridSearchCV object
-    """  
+        model: Scikit Pipeline or GridSearchCV object
+    """ 
+
+
+    # Create custom transformer
+
+    class StartingVerbExtractor(BaseEstimator, TransformerMixin):
+
+        def starting_verb(self, text):
+            sentence_list = nltk.sent_tokenize(text)
+            for sentence in sentence_list:
+                pos_tags = nltk.pos_tag(tokenize(sentence))
+                first_word, first_tag = pos_tags[0]
+                if first_tag in ['VB', 'VBP'] or first_word == 'RT':
+                    return True
+            return False
+
+        def fit(self, x, y=None):
+            return self
+
+        def transform(self, X):
+            X_tagged = pd.Series(X).apply(self.starting_verb)
+            return pd.DataFrame(X_tagged)
 
     pipeline = Pipeline([
-            ('vect', CountVectorizer(tokenizer=tokenize)),
-            ('tfidf', TfidfTransformer()),
-            ('clf', MultiOutputClassifier(LinearSVC()))
+        ('features', FeatureUnion([
+
+            ('text_pipeline', Pipeline([
+                ('vect', CountVectorizer(tokenizer=tokenize)),
+                ('tfidf', TfidfTransformer())
+            ])),
+
+            ('starting_verb', StartingVerbExtractor())
+        ])),
+
+        ('clf', MultiOutputClassifier(LinearSVC()))
     ])
 
-    return pipeline
+    model = pipeline
+
+    # Use grid search to find better parameters #
+
+    check pipeline parameters
+    pipeline.get_params()
+
+    parameters = {
+        'clf__estimator__loss': ('hinge', 'squared_hinge'),
+        'clf__estimator__C': (0.01, 0.5, 1.0)
+    } 
+
+
+    cv = GridSearchCV(estimator=pipeline, n_jobs = -1, param_grid=parameters)
+    
+    model = cv
+
+    return model
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
@@ -152,33 +198,10 @@ def evaluate_model(model, X_test, Y_test, category_names):
     accuracy = (Y_pred == Y_test).mean().mean()
     print('Accuracy {0:.2f}% \n'.format(accuracy*100))
 
-    # Some labels in Y_test don't appear in Y_pred
-    # print("Labels in Y_test that are not in Y_pred\n", set(Y_test) - set(Y_pred))
-    # Y_pred_pd = pd.DataFrame(Y_pred, columns = Y_test.columns)
-
-    # print(classification_report(Y_test.values, Y_pred, category_names, zero_division=0))
-
-    ######################### or ############################################
-
-    # not interested in the scores of labels that were not predicted, and then 
-    # explicitly specify the labels you are interested in (which are labels that 
-    # were predicted at least once):
-
-    # print(classification_report(Y_test.values, Y_pred, labels=np.unique(Y_pred.columns)))
-
-
-    # with open('out.txt', 'w') as f:       
-    #     print(classification_report(Y_test.values, Y_pred, category_names), file=f)  
-
-    # Print classification report
-    # Y_pred = pd.DataFrame(Y_pred, columns = Y_test.columns)
-    
-    # for column in Y_test.columns:
-    #     print('Model Performance with Category: {}'.format(column))
-    #     print(classification_report(Y_test[column], Y_pred[column]))
+    # print(classification_report(Y_test.values, Y_pred, category_names))
 
     # if we use grid search
-    # print("\nBest Parameters:", model.best_params_)
+    print("\nBest Parameters:", model.best_params_)
 
 
 def save_model(model, model_filepath):
