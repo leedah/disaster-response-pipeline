@@ -130,8 +130,11 @@ def save_data(df, database_filename):
     """  
 
     engine = create_engine('sqlite:///'+ database_filename)
-    table_name = database_filename.replace(".db","") + "Table"
-    df.to_sql('table_name', engine, index=False, if_exists='replace')
+    path, file = os.path.split(database_filename)
+    # print(path, file)
+    table_name = file.replace(".db","") + "Table"
+    # print(table_name)
+    df.to_sql(table_name, engine, index=False, if_exists='replace')
 
 
 def main():

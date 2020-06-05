@@ -62,12 +62,13 @@ def load_data(database_filepath):
     """  
     
     engine = create_engine('sqlite:///'+ database_filepath)
-    # print(engine.table_names())
-    table_name = os.path.basename(database_filepath).replace(".db","") + "Table"
+    path, file = os.path.split(database_filepath)
+    # print(path, file)
+    table_name = file.replace(".db","") + "Table"
+  
     sql_query = f"SELECT * FROM {table_name}"
     # print(sql_query)
     df = pd.read_sql(sql_query, engine)
-    print(df.shape)
     
     X = df['message']
 
