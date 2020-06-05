@@ -45,11 +45,11 @@ Arguments:
 ### Flask Web App
 
 Search Bar:
-![Search Bar](img/search_bar.png=)
+![Search Bar](img/search_bar.png)
 
 Overview of training dataset:
 ![Genre Visualization](img/genre.png)
-![Category Visualization](img/category.png=)
+![Category Visualization](img/category.png)
 
 Example of a message classification:
 ![Example](img/army.png)
