@@ -1,4 +1,5 @@
 import sys
+import os
 import pandas as pd
 from sqlalchemy import create_engine
 
@@ -16,7 +17,7 @@ Usage:
     python process_data.py <messages_filepath> <categories_filepath> <database_filename>
 
 Execution Example:
-    python process_data.py disaster_messages.csv disaster_categories.csv disaster_response_db.db
+    python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db
 
 """
 
