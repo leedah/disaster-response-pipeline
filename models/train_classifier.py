@@ -12,7 +12,7 @@ Usage:
     python train_classifier.py <database_filepath> <model_filepath>
 
 Execution Example:
-    python train_classifier.py ../data/DisasterResponse.db classifier.pkl
+    python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl
 
 """
 
@@ -44,7 +44,7 @@ from sklearn.neighbors import KNeighborsClassifier, RadiusNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC, LinearSVC
 
-from sklearn.metrics import make_scorer, accuracy_score, f1_score, fbeta_score, classification_report
+from sklearn.metrics import accuracy_score, f1_score, classification_report
 
 nltk.download(['punkt', 'wordnet', 'averaged_perceptron_tagger'])
 
@@ -172,11 +172,6 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
     Y_pred = model.predict(X_test)
 
-    # overall accuracy
-    accuracy = (Y_pred == Y_test).mean().mean()
-    print('Accuracy {0:.2f}% \n'.format(accuracy*100))
-
-
     # If some labels are not predicted at least once, Y_pred will have different 
     # columns than Y_test, which will cause an error in the classification_report()
     # So make sure Y_pred has the same labels as Y_test.
@@ -186,6 +181,10 @@ def evaluate_model(model, X_test, Y_test, category_names):
     Y_pred.index = Y_test.index;
 
     print(classification_report(Y_test, Y_pred, target_names=category_names))
+
+    # overall accuracy
+    accuracy = (Y_pred == Y_test).mean().mean()
+    print('Accuracy {0:.2f}% \n'.format(accuracy*100))
 
     # if we use grid search
     print("\nBest Parameters:", model.best_params_)
